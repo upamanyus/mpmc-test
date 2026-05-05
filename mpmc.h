@@ -14,7 +14,7 @@
 
 typedef struct {
     _Atomic size_t  seq;
-    void           *val;
+    _Atomic(void *) val;
 } queue_slot_t;
 
 typedef struct {
@@ -41,7 +41,7 @@ static inline bool queue_push(queue_t *q, void *val) {
             if (atomic_compare_exchange_weak_explicit(
                     &q->tail, &pos, pos + 1,
                     memory_order_relaxed, memory_order_relaxed)) {
-                slot->val = val;
+                atomic_store_explicit(&slot->val, val, memory_order_relaxed);
                 atomic_store_explicit(&slot->seq, pos + 1, memory_order_release);
                 return true;
             }
@@ -67,7 +67,7 @@ static inline void *queue_pop(queue_t *q) {
             if (atomic_compare_exchange_weak_explicit(
                     &q->head, &pos, pos + 1,
                     memory_order_relaxed, memory_order_relaxed)) {
-                void *val = slot->val;
+                void *val = atomic_load_explicit(&slot->val, memory_order_relaxed);
                 atomic_store_explicit(&slot->seq, pos + QUEUE_CAPACITY, memory_order_release);
                 return val;
             }
