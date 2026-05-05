@@ -21,10 +21,10 @@ static void *worker(void *arg) {
         }
 
         void *out = queue_pop(&q);
-        // if (out == NULL) {
-        // fprintf(stderr, "thread %d: queue_pop returned NULL at i=%d\n", id, i);
-        // return NULL;
-        // }
+        if (out == NULL) {
+            fprintf(stderr, "thread %d: queue_pop returned NULL at i=%d\n", id, i);
+            return NULL;
+        }
         if (out != NULL) {
             free(out);
         }

@@ -46,8 +46,10 @@ static inline bool queue_push(queue_t *q, void *val) {
                 return true;
             }
         } else if (diff < 0) {
-            fprintf(stderr, "diff = %d\n", diff);
-            return false;  // full
+            size_t head = atomic_load_explicit(&q->head, memory_order_relaxed);
+            if ((intptr_t)(pos - head) >= (intptr_t)QUEUE_CAPACITY)
+                return false;  // truly full
+            // else: consumer claimed slot but hasn't recycled yet — spin
         } else {
             pos = atomic_load_explicit(&q->tail, memory_order_relaxed);
         }
@@ -70,7 +72,10 @@ static inline void *queue_pop(queue_t *q) {
                 return val;
             }
         } else if (diff < 0) {
-            return NULL;  // empty
+            size_t tail = atomic_load_explicit(&q->tail, memory_order_relaxed);
+            if ((intptr_t)(tail - pos) <= 0)
+                return NULL;  // truly empty
+            // else: producer claimed slot but hasn't published yet — spin
         } else {
             pos = atomic_load_explicit(&q->head, memory_order_relaxed);
         }
