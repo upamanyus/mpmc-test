@@ -1,0 +1,2 @@
+repeat 100 ./test 2>&1 2>&1 | grep "diff"
+shows only either diff = -1023 or diff = -1024.

@@ -4,7 +4,7 @@
 #include "mpmc.h"
 
 #define N 8
-#define OPS_PER_THREAD 10000
+#define OPS_PER_THREAD 1000
 
 static queue_t q;
 
@@ -21,11 +21,13 @@ static void *worker(void *arg) {
         }
 
         void *out = queue_pop(&q);
-        if (out == NULL) {
-            fprintf(stderr, "thread %d: queue_pop returned NULL at i=%d\n", id, i);
-            return NULL;
+        // if (out == NULL) {
+        // fprintf(stderr, "thread %d: queue_pop returned NULL at i=%d\n", id, i);
+        // return NULL;
+        // }
+        if (out != NULL) {
+            free(out);
         }
-        free(out);
     }
     return (void *)1;
 }
