@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 // Lock-free MPMC ring buffer (Vyukov, 2010).
 // Fixed capacity; no malloc. QUEUE_CAPACITY must be a power of 2.
@@ -45,6 +46,7 @@ static inline bool queue_push(queue_t *q, void *val) {
                 return true;
             }
         } else if (diff < 0) {
+            fprintf(stderr, "diff = %d\n", diff);
             return false;  // full
         } else {
             pos = atomic_load_explicit(&q->tail, memory_order_relaxed);
